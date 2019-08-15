@@ -43,7 +43,7 @@ const StarsList = (props) => {
     }, []);
 
     return <div>
-        <StarHeading>Star War Heros</StarHeading>
+        <StarHeading>The Force Awakens</StarHeading>
         <StarList>
             {stars.map(star => {
                 return <StarIinfo>
