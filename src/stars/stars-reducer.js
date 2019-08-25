@@ -12,7 +12,7 @@ const starsReducer = (state = initState, action) => {
         case ActionTypes.FETCH_STARS:
             return {...state, isFetching: true};
         case ActionTypes.LOAD_STARS:
-            return { ...state, isFetching: false, stars: action.stars, count: action.count, nextStars: action.nextStars };
+            return { ...state, isFetching: false, stars: [...state.stars, ...action.stars], count: action.count, nextStars: action.nextStars };
         default:
             return state;
     }

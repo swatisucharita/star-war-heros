@@ -1,6 +1,7 @@
-import React, {useState, useEffect} from 'react';
+import React, {useRef, useEffect, useState, useCallback} from 'react';
 import styled from 'styled-components';
-import Gravatar from 'react-gravatar'
+import Gravatar from 'react-gravatar';
+import Spinner from "react-svg-spinner";
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { fetchStars } from './stars-actions';
@@ -23,9 +24,14 @@ const StarIinfo = styled.div`
 const StarDetails = styled.div`
     margin: 0 20px;
 `;
+const Loader = styled.div`
+    width: 100%;
+    height: 70px;
+    text-align: center;
+`;
 
 const StarsList = (props) => {
-    const { fetchStars, stars, nextStars } = props;
+    const { fetchStars, stars, isFetching, nextStars } = props;
     const attributes = [
         {name: 'name', label: 'Name'},
         {name: 'height', label: 'Height'},
@@ -36,11 +42,35 @@ const StarsList = (props) => {
         {name: 'birth_year', label: 'Birth Year'},
         {name: 'gender', label: 'Gender'}
     ];
-    // const [stars, addStar] = useState(props.stars || []);
+    // Create ref to attach to the loader component
+    const loader = useRef(null);
+
+    const loadMore = useCallback((entries) => {
+
+        const target = entries[0];
+        if (target.isIntersecting && nextStars) {
+            !isFetching && fetchStars(nextStars)
+        }
+    }, [isFetching, nextStars, fetchStars]);
 
     useEffect(() => {
-        fetchStars(nextStars);
-    }, []);
+        const options = {
+            root: null, // window by default
+            rootMargin: '0px',
+            threshold: 0.25
+        };
+
+        // Create observer
+        const observer = new IntersectionObserver(loadMore, options);
+
+        // observer the loader
+        if (loader && loader.current) {
+            observer.observe(loader.current);
+        }
+
+        // clean up on willUnMount
+        return () => observer.unobserve(loader.current);
+    }, [loader, loadMore]);
 
     return <div>
         <StarHeading>The Force Awakens</StarHeading>
@@ -58,13 +88,15 @@ const StarsList = (props) => {
                     </StarDetails>
                 </StarIinfo>;
             })}
+            <Loader ref={loader}>{isFetching && <Spinner color="goldenrod" size="64px" thickness={2}/>}</Loader>
         </StarList>
     </div>;
 };
 
 const mapStateToProps = (state) => {
-    const {stars, nextStars} = state.stars;
+    const {isFetching, stars, nextStars} = state.stars;
     return {
+        isFetching,
         stars,
         nextStars
     };
