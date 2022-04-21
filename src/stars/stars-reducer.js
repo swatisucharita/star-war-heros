@@ -2,7 +2,7 @@ import * as ActionTypes from './stars-action-types';
 
 const initState = {
     count: 0,
-    nextStars: 'https://www.swapi.co/api/people',
+    nextStars: 'https://www.swapi.dev/api/people',
     stars: [],
     isFetching: false
 };
